@@ -8,5 +8,5 @@ import 'package:minesweeper/minesweeper.dart';
 main(List<String> arguments) {
   var minesweeper = new Minesweeper.fromStdin();
   minesweeper.solve();
-  minesweeper.print();
+  print(minesweeper.toString());
 }

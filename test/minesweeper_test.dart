@@ -8,7 +8,17 @@ import 'package:test/test.dart';
 import 'package:minesweeper/minesweeper.dart';
 
 void main() {
-  test('calculate', () {
-    expect(calculate(), 42);
+  test('informNeighbors', () {
+    var field = new NoBomb();
+    var bomb = new Bomb();
+
+    Minesweeper.setAsNeighbors(field, bomb);
+    bomb.informNeighbors();
+
+    expect(field.neighboringBombs, 1);
+  });
+
+  test('integration1', () {
+
   });
 }

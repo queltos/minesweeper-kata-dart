@@ -4,22 +4,23 @@
 // No if allowed :)
 
 /// The minesweeper library.
-library bombsweeper;
+library minesweeper;
 
 import 'dart:io';
 
 class Minesweeper {
   static Map symbolMap = {"x": createBomb, '-': createNoBomb};
 
-  Set<Bomb> bombs;
-  List<List> playfield;
+  Set<Bomb> _bombs;
+  List<List> _playfield;
 
   Minesweeper.fromStdin() {
-    playfield = [];
-    bombs = new Set<Bomb>();
+    _playfield = [];
+    _bombs = new Set<Bomb>();
 
     var line = stdin.readLineSync();
     var lengths = line.split(' ');
+    var noLines = int.parse(lengths[0]);
     var lineLen = int.parse(lengths[1]);
 
     var charList, fieldList;
@@ -28,56 +29,64 @@ class Minesweeper {
     List<Field> prevLine = new List<Field>.generate(lineLen, (_) => new NoBomb());
 
     line = stdin.readLineSync();
-    while(line != null) {
+    for(var i = 0; i < noLines; i++) {
       charList = line.split('');
       fieldList = charList.map((char) => symbolMap[char](this)).toList();
 
-      setNeighbors(prevLine, fieldList);
+      setNeighborsForLine(prevLine, fieldList);
 
-      playfield.add(fieldList);
+      _playfield.add(fieldList);
 
-      prevLine = line;
+      prevLine = fieldList;
       line = stdin.readLineSync();
     }
   }
 
-  setNeighbors(List<Field> prevLine, List<Field> fieldLine) {
-    print('something');
-//    print(prevLine.toString());
-    var paddedPrevLine = [new NoBomb()].addAll(prevLine);
+  setNeighborsForLine(List<Field> prevLine, List<Field> currentLine) {
+    var paddedPrevLine = [new NoBomb()]..addAll(prevLine)..add(new NoBomb());
     var i = 0;
     var prevField = new NoBomb();
-    for(Field field in fieldLine) {
+    for(Field field in currentLine) {
       setAsNeighbors(prevField, field);
-      for(var j = i; j < 3; j++) {
+      for(var j = i; j < i + 3; j++) {
         setAsNeighbors(paddedPrevLine[j], field);
       }
-
       prevField = field;
       i++;
     }
-
-    playfield.add(fieldLine);
   }
 
-  setAsNeighbors(Field field1, Field field2) {
+  addBomb(Bomb bomb) => _bombs.add(bomb);
+
+  static setAsNeighbors(Field field1, Field field2) {
     field1.addNeighbor(field2);
     field2.addNeighbor(field1);
   }
 
   solve() {
-    bombs.map((bomb) => bomb.informNeighbors());
+    for(var bomb in _bombs) {
+      bomb.informNeighbors();
+    }
   }
 
-  print() {
-    playfield.map((List<Field> line) {
-      print(line.join(' ').toString());
-    });
+  toString() {
+    var lineStr = '';
+    for(var line in _playfield) {
+      lineStr += line.join(' ').toString();
+      lineStr += '\n';
+    }
+
+    return lineStr;
   }
 }
 
 abstract class Field {
-  Set<Field> _neighbors = new Set<Field>();
+  Set<Field> _neighbors;
+  Set<Field> get neighbors => _neighbors;
+
+  Field() {
+    _neighbors = new Set<Field>();
+  }
 
   addNeighbor(Field neighbor) {
     _neighbors.add(neighbor);
@@ -89,6 +98,9 @@ abstract class Field {
 
 class NoBomb extends Field {
   int _neighboringBombs = 0;
+  int get neighboringBombs => _neighboringBombs;
+
+  NoBomb() : super();
 
   toString() {
     return _neighboringBombs.toString();
@@ -100,6 +112,8 @@ class NoBomb extends Field {
 }
 
 class Bomb extends Field {
+  Bomb() : super();
+
   informNeighbors() {
     for(var neighbor in _neighbors) {
       neighbor.incNeighboringBombs();
@@ -113,7 +127,7 @@ class Bomb extends Field {
 
 createBomb(Minesweeper minesweeper) {
   var bomb = new Bomb();
-  minesweeper.bombs.add(bomb);
+  minesweeper.addBomb(bomb);
   return bomb;
 }
 
