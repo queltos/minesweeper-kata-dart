@@ -1,3 +1,3 @@
 # minesweeper
 
-minesweeper kata done in dart with no `if`'s allowed.
+minesweeper kata done in dart with no `if` allowed.
