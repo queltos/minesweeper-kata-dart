@@ -1,3 +1,3 @@
 # minesweeper
 
-A sample command-line application.
+minesweeper kata done in dart with no `if`'s allowed.
